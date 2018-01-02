@@ -56,3 +56,9 @@ docs/_build/
 
 # PyBuilder
 target/
+
+db_connection\.py
+
+fs_connection\.py
+
+web_connection\.py
