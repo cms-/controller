@@ -62,3 +62,5 @@ db_connection\.py
 fs_connection\.py
 
 web_connection\.py
+
+sqlite_testing\.db

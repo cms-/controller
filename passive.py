@@ -2,28 +2,10 @@ import sys
 import time
 import os
 import contextlib
+
+import db
 from web_connection import the_https_request
-from db_connection import the_sqlite_connection
 from fs_connection import the_resource_path
-
-def query(sql, args):
-	# Can a query function handle both inserts and selects?
-	# This one seems to be capable of such.
-	# Untested with updates.
-	with the_sqlite_connection as conn:
-		try:
-			curs = conn.cursor()
-			curs.execute(sql,args)
-			result = curs.fetchall()
-			try:
-				conn.commit()
-			except:
-				pass
-
-			return result
-		except Exception as error:
-			print('caught this error: ' + repr(error))
-
 
 def fetchServices(node_id=None):
 	"""
@@ -37,12 +19,12 @@ def fetchServices(node_id=None):
 	resList = []
 	sql = '''SELECT id, fqdn FROM node WHERE active=:act;'''
 	args = {"act": 1}
-	nodes = query(sql, args)
+	nodes = db.query(sql, args)
 
 	for node in nodes:
 		sql = '''SELECT id, uri, proto FROM service WHERE active=:act and node_id=:node_id;'''
 		args = {"act": 1, "node_id": node[0]}
-		resources = query(sql, args)
+		resources = db.query(sql, args)
 
 	 	for resource in resources:
 			resList.append({'fqdn': node[1], 'uri': resource[1], 'proto': resource[2], 'node_id': node[0], 
@@ -106,7 +88,7 @@ def storeDB(resDict):
     """
 	sql = '''INSERT INTO resource(date,path,service_id) VALUES(?,?,?);'''
 	args = (resDict['res_time'], resDict['res_file'], resDict['service_id'])
-	print query(sql, args)
+	print db.query(sql, args)
 	# TODO: error handling on exit--check number of lines inserted via query function?
 
 
