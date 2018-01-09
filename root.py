@@ -10,7 +10,7 @@ class Root():
 		self.branch_table = branch_table
 		self.branches = {}
 
-	def getBranches(table, xref_id=1, xref_col='active'):
+	def fetchBranches(table, xref_id=1, xref_col='active'):
 		sql = '''SELECT * FROM ''' + table + ''' WHERE ''' + xref_col + '''=:xref_id;'''
 		args = {"xref_id": xref_id}
 		#print (sql, args)
@@ -26,18 +26,22 @@ class Root():
 
 	def listBranches(self):
 		print (self.name + " \\")
-		for key, branch in self.branches.items():
-			print (branch)
+		for value in Root.iterBranches(self):
+			print(value)
 
-	def iterBranches(self, branch_id, branch_table):
-		print("not yet")
+	def getBranches(self):
+		return self.branches
+
+	def iterBranches(self):
+		for value in self.branches.values():
+			yield value
 
 
 class Trunk(Root):
 
 	def __init__(self):
 		Root.__init__(self, 0, 'Trunk', 'node')
-		branches = Root.getBranches(self.branch_table)
+		branches = Root.fetchBranches(self.branch_table)
 		Root.addBranches(self, branches)
 
 
@@ -45,18 +49,16 @@ class Node(Root):
 
 	def __init__(self, id, name):
 		Root.__init__(self, id, name, 'service', 'node')
-		branches = Root.getBranches(self.branch_table, self.id, self.table + "_id")
+		branches = Root.fetchBranches(self.branch_table, self.id, self.table + "_id")
 		Root.addBranches(self, branches)
-		self.listBranches()
 
 
 class Service(Root):
 
 	def __init__(self, id, name):
 		Root.__init__(self, id, name, 'resource', 'service')
-		branches = Root.getBranches(self.branch_table, self.id, self.table + "_id")
+		branches = Root.fetchBranches(self.branch_table, self.id, self.table + "_id")
 		Root.addBranches(self, branches)
-		self.listBranches()
 
 class Resource(Root):
 
@@ -65,4 +67,7 @@ class Resource(Root):
 
 
 trunk = Trunk()
+obj = trunk.getBranches()
 trunk.listBranches()
+for value in trunk.iterBranches():
+	print(value)
